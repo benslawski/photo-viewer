@@ -10,6 +10,7 @@ SQLAlchemy==0.7.9
 WTForms==1.0.2
 Werkzeug==0.8.3
 blinker==1.2
+boto==2.8.0
 itsdangerous==0.17
 passlib==1.6.1
 psycopg2==2.4.6
