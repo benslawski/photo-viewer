@@ -12,6 +12,7 @@
         var tree_labels = [];
 
         var this_path = [Object.keys(tree_structure)[0]];
+        var this_image = Object.keys(tree_structure)[0];
 
         function drawTree (branch0) {
             var branch = branch0;
@@ -28,19 +29,35 @@
                 sub_tree = sub_tree[branch_path[i]];
             }
 
-            if (Object.keys(sub_tree[branch]).length > 0) {
-                for (i=0; i<tree_labels.length; i++) {
-                    if (tree_keys[i] == branch) {
-                        d3.select(tree_labels[i]).transition().attr("x", 25).attr("y", 15).attr("font-size", 18);
-                    } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
-                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i])).attr("font-size", 14);
+            var can_downshift = Object.keys(sub_tree[branch]).length > 0;
+
+            for (i=0; i<tree_labels.length; i++) {
+                if (tree_keys[i] == branch) {
+                    if (can_downshift) {
+                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 15).attr("font-size", 18).attr("fill", "#71ced8");
                     } else {
-                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14);
+                        d3.select(tree_labels[i]).transition().attr("fill", "#71ced8")
+                    }
+                } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
+                    if (can_downshift) {
+                        d3.select(tree_labels[i]).transition().attr("x", 50).attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i])).attr("font-size", 14).attr("fill", "#edfdfe");
+                    } else {
+                        d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe");
+                    }
+                } else {
+                    if (can_downshift) {
+                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
+                    } else {
+                        d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe");
                     }
                 }
-            } else {
-                this_path.pop()
             }
+
+            if (!can_downshift) {
+                this_path.pop();
+            }
+
+            this_image = branch0;
         };
 
         function drawCard () {
