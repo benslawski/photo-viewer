@@ -1,0 +1,71 @@
+<html>
+   <head>
+     <script src="http://d3js.org/d3.v2.js"></script>
+     <title>{% block title %}The Photo Collective{% endblock %}</title>
+         <style type="text/css">
+             body {background-color:#282B38;} 
+         </style>
+   </head>
+   <body>
+   <div style="min-width: 1024px; min-height: 500px;">
+     <div id="color_circles" style="position:relative; float:right;"></div>
+     <script type="text/javascript">
+         function setCircles() {
+             document.getElementById('color_circles').style.top = window.innerHeight - 310 + window.pageYOffset + 'px';
+         };
+
+         window.onresize = function (d) { setCircles(); }
+         window.onload = function (d) { setCircles(); }
+         window.onscroll = function (d) { setCircles(); }
+     </script>
+     <script type="text/javascript">
+         var canvas = d3.select("#color_circles").append("svg")
+                                                 .attr("width", 1024)
+                                                 .attr("height", 300)
+         ;
+
+         var circles = [];
+ 
+         var colors = [
+                       "#D2DFFF",
+                       "#339999",
+                       "#11204B",
+                       "#282B38",
+                       "#111222"
+                      ];
+
+         var circle_colors = colors.slice();
+         var bg_color = "#282B38";
+         circle_colors.splice(colors.indexOf(bg_color), 1);
+
+         function drawCircles() {
+             canvas.selectAll("circle").transition().attr("fill", function (d, i) { return circle_colors[i]; })
+             d3.select("body").transition().style("background-color", bg_color);
+         };
+
+         circles = canvas.selectAll("circle")
+                         .data(circle_colors)
+                         .enter()
+                         .append("circle")
+                                .attr("cx", 975)
+                                .attr("cy", function (d, i) { return 300 - (circle_colors.length - i)*45; })
+                                .attr("r", 20)
+                                .attr("fill", function (d) {return d;})
+                                .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                .on("mouseout", function (d) {d3.select('body').style("cursor", "default");})
+                                .on("click", function (d, i) {
+                                                              tmp = colors.slice();
+                                                              bg_color = tmp.splice(colors.indexOf(circle_colors[i]), 1);
+                                                              circle_colors = tmp;
+                                                              drawCircles();
+                                                             })
+         ;
+
+     </script>
+ 
+     <div id="header">{% block header %}{% endblock %}</div>
+     <div id="content">{% block content %}{% endblock%}</div>
+     <div id="footer">{% block footer %}{% endblock%}</div>
+   </div>
+   </body>
+</html>
