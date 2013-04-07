@@ -13,6 +13,7 @@ from flask.ext.security.datastore.sqlalchemy import SQLAlchemyUserDatastore
 ## python modules
 import os
 from boto.s3.connection import S3Connection
+from zipfile import *
 
 
 app = Flask(__name__)
@@ -24,7 +25,8 @@ app.config['SECRET_KEY'] = '908u23r@32r2&//adfeofi21002'
 def main_page():
     conn = S3Connection('AKIAI6WMUYBUBJ2T3GMQ', 'hz0evOhGQTHgAeUeEZaJ0XIBv+wVU1C6iKyafe5b')    
     bucket = conn.get_bucket('photo-collective')
-    bucket.get_key('photos.zip').get_contents_as_string()
+    ## TODO: read bucket contents
+
     return render_template('view_album.html')
 
 
