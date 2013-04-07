@@ -5,6 +5,44 @@
     <div id="photo_card" style="position:absolute;"></div>
 
     <script type="text/javascript">
+        var photo_list = {{ photo_list | safe }};
+        var tree_structure = {{ structure | safe }};
+
+        var tree_keys = Object.keys(photo_list);
+        var tree_labels = [];
+
+        var this_path = [Object.keys(tree_structure)[0]];
+
+        function drawTree (branch0) {
+            var branch = branch0;
+            if (branch0 == this_path[this_path.length-1]) {
+                if (this_path.length > 1) { this_path.pop(); }
+                branch = this_path[this_path.length-1];
+            } else {
+                this_path.push(branch);
+            }
+
+            var branch_path = photo_list[branch].split("/");
+            var sub_tree = tree_structure;
+            for (i=0; i<branch_path.length-1; i++) {
+                sub_tree = sub_tree[branch_path[i]];
+            }
+
+            if (Object.keys(sub_tree[branch]).length > 0) {
+                for (i=0; i<tree_labels.length; i++) {
+                    if (tree_keys[i] == branch) {
+                        d3.select(tree_labels[i]).transition().attr("x", 25).attr("y", 15).attr("font-size", 18);
+                    } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
+                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i])).attr("font-size", 14);
+                    } else {
+                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14);
+                    }
+                }
+            } else {
+                this_path.pop()
+            }
+        };
+
         function drawCard () {
             var card_handle = document.getElementById('photo_card');
             var width = d3.max([window.innerWidth - 550, 474]),
@@ -20,6 +58,27 @@
         };
 
         {% block onload %}
+            tree_labels = []
+            d3.select("#folder_tree").selectAll("svg").remove()
+            var tree_canvas = d3.select("#folder_tree").append("svg").attr("width", 300).attr("height", 400);
+
+            tree_labels = tree_canvas.selectAll("text")
+                                     .data(tree_keys)
+                                     .enter()
+                                     .append("text")
+                                             .text(function (d) {return d;})
+                                             .attr("fill", "#edfdfe")
+                                             .attr("font-family", "Tahoma")
+                                             .attr("font-size", 14)
+                                             .attr("x", 0)
+                                             .attr("y", -10)
+                                             .on("click", function (d) {drawTree(d);})
+            ;
+            tree_labels = tree_labels[0];
+
+            drawTree(Object.keys(tree_structure)[0]);
+
+
             d3.select("#photo_card").selectAll("svg").remove()
             var card_canvas = d3.select("#photo_card").append("svg");
 
