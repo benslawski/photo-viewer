@@ -21,7 +21,12 @@ app.config['SECRET_KEY'] = '908u23r@32r2&//adfeofi21002'
 
 @app.route('/', methods=['POST', 'GET'])
 def main_page():
-    return 'One step at a time'
+    if request.method == 'GET':
+        return render_template('upload_file.html')
+
+    elif request.method == 'POST':
+        file = request.files['file']
+        return 'One step at a time'
 
 
 
