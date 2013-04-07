@@ -8,10 +8,13 @@
    </head>
    <body>
    <div style="min-width: 1024px; min-height: 500px;">
-     <div id="color_circles" style="position:relative; float:right;"></div>
+     <div style="position=relative; float:left; top:0;">
+         <img src="http://dl.dropbox.com/u/95202067/title.png" width=400>
+     </div>
+     <div id="color_circles" style="position:relative; float:right; margin-right:5px;"></div>
      <script type="text/javascript">
          function setCircles() {
-             document.getElementById('color_circles').style.top = window.innerHeight - 310 + window.pageYOffset + 'px';
+             document.getElementById('color_circles').style.top = window.innerHeight - 325 + window.pageYOffset + 'px';
          };
 
          window.onresize = function (d) { setCircles(); }
@@ -20,14 +23,14 @@
      </script>
      <script type="text/javascript">
          var canvas = d3.select("#color_circles").append("svg")
-                                                 .attr("width", 1024)
+                                                 .attr("width", 60)
                                                  .attr("height", 300)
          ;
 
          var circles = [];
  
          var colors = [
-                       "#D2DFFF",
+                       "#C9D0FF",
                        "#339999",
                        "#11204B",
                        "#282B38",
@@ -47,7 +50,7 @@
                          .data(circle_colors)
                          .enter()
                          .append("circle")
-                                .attr("cx", 975)
+                                .attr("cx", 30)
                                 .attr("cy", function (d, i) { return 300 - (circle_colors.length - i)*45; })
                                 .attr("r", 20)
                                 .attr("fill", function (d) {return d;})
