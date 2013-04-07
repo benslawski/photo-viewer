@@ -8,8 +8,9 @@
    </head>
    <body>
    <div style="min-width: 1024px; min-height: 500px;">
-     <div style="position=relative; float:left; top:0;">
-         <img src="http://dl.dropbox.com/u/95202067/title.png" width=400>
+     <div id="header">{% block header %}{% endblock %}</div>
+     <div style="position:relative; float:left; top:0; height:60px;">
+         <img src="http://dl.dropbox.com/u/95202067/title.png" width=350>
      </div>
      <div id="color_circles" style="position:relative; float:right; margin-right:15px;"></div>
      <script type="text/javascript">
@@ -17,14 +18,14 @@
              document.getElementById('color_circles').style.top = window.innerHeight - 325 + window.pageYOffset + 'px';
          };
 
-         window.onresize = function (d) { setCircles(); }
-         window.onload = function (d) { setCircles(); }
+         window.onresize = function (d) { setCircles(); {% block onresize %}{% endblock %}}
+         window.onload = function (d) { setCircles(); {% block onload %}{% endblock %}}
          window.onscroll = function (d) { setCircles(); }
      </script>
      <script type="text/javascript">
-         var canvas = d3.select("#color_circles").append("svg")
-                                                 .attr("width", 60)
-                                                 .attr("height", 300)
+         var main_canvas = d3.select("#color_circles").append("svg")
+                                                      .attr("width", 60)
+                                                      .attr("height", 300)
          ;
 
          var circles = [];
@@ -42,11 +43,11 @@
          circle_colors.splice(colors.indexOf(bg_color), 1);
 
          function drawCircles() {
-             canvas.selectAll("circle").transition().attr("fill", function (d, i) { return circle_colors[i]; })
+             main_canvas.selectAll("circle").transition().attr("fill", function (d, i) { return circle_colors[i]; })
              d3.select("body").transition().style("background-color", bg_color);
          };
 
-         circles = canvas.selectAll("circle")
+         circles = main_canvas.selectAll("circle")
                          .data(circle_colors)
                          .enter()
                          .append("circle")
@@ -66,7 +67,6 @@
 
      </script>
  
-     <div id="header">{% block header %}{% endblock %}</div>
      <div id="content">{% block content %}{% endblock%}</div>
      <div id="footer">{% block footer %}{% endblock%}</div>
    </div>
