@@ -3,7 +3,7 @@
      <script src="http://d3js.org/d3.v2.js"></script>
      <title>{% block title %}My Site{% endblock %}</title>
          <style type="text/css">
-             body {background-color:#20232C;} 
+             body {background-color:#282B38;} 
          </style>
    </head>
    <body>
@@ -20,12 +20,12 @@
                        "#D2DFFF",
                        "#339999",
                        "#11204B",
-                       "#232531",
+                       "#282B38",
                        "#111222"
                       ];
 
          var circle_colors = colors.slice();
-         var bg_color = "#232531";
+         var bg_color = "#282B38";
          circle_colors.splice(colors.indexOf(bg_color), 1);
 
          function drawCircles() {
@@ -41,6 +41,8 @@
                                 .attr("cy", function (d, i) { return 60 + i*45; })
                                 .attr("r", 20)
                                 .attr("fill", function (d) {return d;})
+                                .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                .on("mouseout", function (d) {d3.select('body').style("cursor", "default");})
                                 .on("click", function (d, i) {
                                                               tmp = colors.slice();
                                                               bg_color = tmp.splice(colors.indexOf(circle_colors[i]), 1);
