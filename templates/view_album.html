@@ -16,13 +16,14 @@
         var photo_list = {{ photo_list | safe }};
         var tree_structure = {{ structure | safe }};
 
-        var tree_keys = [];
+        var tree_keys = [Object.keys(tree_structure)[0]];
         var this_key0, this_key1, this_key2;
-        var sub_structure0, sub_structure1;
-        for (i=0; i<Object.keys(tree_structure).length; i++) {
-            this_key0 = Object.keys(tree_structure)[i];
+        var sub_structure, sub_structure0, sub_structure1;
+        sub_structure = tree_structure[Object.keys(tree_structure)[0]];
+        for (i=0; i<Object.keys(sub_structure).length; i++) {
+            this_key0 = Object.keys(sub_structure)[i];
             tree_keys.push(this_key0);
-            sub_structure0 = tree_structure[this_key0];
+            sub_structure0 = sub_structure[this_key0];
 
             for (j=0; j<Object.keys(sub_structure0).length; j++) {
                 this_key1 = Object.keys(sub_structure0)[j];
