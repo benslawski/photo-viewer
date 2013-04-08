@@ -4,24 +4,81 @@
     <div id="folder_tree" style="position:absolute; left:10px; top:75px; width:300px; height:400px;"></div>
     <div id="photo_card" style="position:absolute;"></div>
 
+    <div id="left_arrow" style="position:absolute; left:50px; bottom:50px; width:62px; height:58px;">
+        <img src="http://dl.dropbox.com/u/95202067/back.png">
+    </div>
+    <div id="right_arrow" style="position:absolute; left:260px; bottom:50px; width:62px; height:58px;">
+        <img src="http://dl.dropbox.com/u/95202067/forward.png">
+    </div>
+
     <script type="text/javascript">
         var photo_list = {{ photo_list | safe }};
         var tree_structure = {{ structure | safe }};
 
-        var tree_keys = Object.keys(photo_list);
+        var tree_keys = [];
+        var this_key0, this_key1, this_key2;
+        var sub_structure0, sub_structure1;
+        for (i=0; i<Object.keys(tree_structure).length; i++) {
+            this_key0 = Object.keys(tree_structure)[i];
+            tree_keys.push(this_key0);
+            sub_structure0 = tree_structure[this_key0];
+
+            for (j=0; j<Object.keys(sub_structure0).length; j++) {
+                this_key1 = Object.keys(sub_structure0)[j];
+                tree_keys.push(this_key1);
+                sub_structure1 = sub_structure0[this_key1];
+
+                for (k=0; k<Object.keys(sub_structure1).length; k++) {
+                    this_key2 = Object.keys(sub_structure1)[k];
+                    tree_keys.push(this_key2);
+                }
+            }
+        }
         var tree_labels = [];
 
         var this_path = [Object.keys(tree_structure)[0]];
         var this_image = Object.keys(tree_structure)[0];
+        var this_image_ind = 0;
 
-        function drawTree (branch0) {
-            var branch = branch0;
-            if (branch0 == this_path[this_path.length-1]) {
-                if (this_path.length > 1) { this_path.pop(); }
-                branch = this_path[this_path.length-1];
+        function drawArrows (leftState, rightState) {
+            if (leftState == 1 && this_image_ind > 0) { 
+                document.getElementById("left_arrow").style.display = "block";
             } else {
-                this_path.push(branch);
+                document.getElementById("left_arrow").style.display = "none";
             }
+
+            if (rightState == 1 && this_image_ind < tree_keys.length-1) { 
+                document.getElementById("right_arrow").style.display = "block";
+            } else {
+                document.getElementById("right_arrow").style.display = "none";
+            }
+        };
+
+        ## TODO: smooth key events
+
+        window.focus();
+        d3.select(window).on("keydown", function() {
+          switch (d3.event.keyCode) {
+            case 37: drawArrows(1,0);
+                     this_image_ind = d3.max([0, this_image_ind-1]);
+                     this_image=tree_keys[this_image_ind]; 
+                     drawTree(this_image); 
+                     break;
+            case 39: drawArrows(0,1);
+                     this_image_ind = d3.min([tree_keys.length, this_image_ind+1]);  
+                     this_image=tree_keys[this_image_ind]; 
+                     drawTree(this_image); 
+                     break;
+          }
+          update();
+        });
+        window.onkeyup = function () { drawArrows(1,1); };
+
+        function drawTree (branch) {
+            var upshift, is_branch;
+
+            var at_root = this_path.length == 1;
+            var upshift = this_path.indexOf(branch) >= 0;
 
             var branch_path = photo_list[branch].split("/");
             var sub_tree = tree_structure;
@@ -29,35 +86,77 @@
                 sub_tree = sub_tree[branch_path[i]];
             }
 
-            var can_downshift = Object.keys(sub_tree[branch]).length > 0;
+            var is_branch = Object.keys(sub_tree[branch]).length > 0;
 
-            for (i=0; i<tree_labels.length; i++) {
-                if (tree_keys[i] == branch) {
-                    if (can_downshift) {
-                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 15).attr("font-size", 18).attr("fill", "#71ced8");
-                    } else {
-                        d3.select(tree_labels[i]).transition().attr("fill", "#71ced8")
-                    }
-                } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
-                    if (can_downshift) {
-                        d3.select(tree_labels[i]).transition().attr("x", 50).attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i])).attr("font-size", 14).attr("fill", "#edfdfe");
-                    } else {
-                        d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe");
-                    }
-                } else {
-                    if (can_downshift) {
-                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
+            if (!is_branch) {
+                for (i=0; i<tree_labels.length; i++) {
+                    if (tree_keys[i] == branch) {
+                        d3.select(tree_labels[i]).transition().attr("fill", "#71ced8");
                     } else {
                         d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe");
                     }
                 }
             }
 
-            if (!can_downshift) {
-                this_path.pop();
+            if (upshift && at_root) {
+                for (i=0; i<tree_labels.length; i++) {
+                    if (tree_keys[i] == branch) {
+                        d3.select(tree_labels[i]).transition().attr("fill", "#71ced8").attr("x", 35).attr("y", 15).attr("font-size", 18);
+                    } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
+                        d3.select(tree_labels[i]).transition()
+                                                 .attr("x", 50)
+                                                 .attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i]))
+                                                 .attr("font-size", 14)
+                                                 .attr("fill", "#edfdfe");
+                    }
+                }
+            }
+            if (upshift && !at_root) {
+                var new_branch;
+                while (!(new_branch == branch)) {
+                    new_branch = this_path.pop();
+                }
+
+                for (i=0; i<tree_labels.length; i++) {
+                    if (tree_keys[i] == this_path[this_path.length-1]) {
+                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 15).attr("font-size", 18).attr("fill", "#edfdfe");
+                    } else if (tree_keys[i] == new_branch) {
+                        d3.select(tree_labels[i]).transition()
+                                                 .attr("x", 50)
+                                                 .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
+                                                 .attr("font-size", 14)
+                                                 .attr("fill", "#71ced8");
+                    } else if (sub_tree.hasOwnProperty(tree_keys[i])) {
+                        d3.select(tree_labels[i]).transition()
+                                                 .attr("x", 50)
+                                                 .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
+                                                 .attr("font-size", 14)
+                                                 .attr("fill", "#edfdfe");
+                    } else {
+                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
+                    }
+                }
             }
 
-            this_image = branch0;
+            if (!upshift && is_branch) {
+                for (i=0; i<tree_labels.length; i++) {
+                    if (tree_keys[i] == branch) {
+                        d3.select(tree_labels[i]).transition().attr("x", 35).attr("y", 15).attr("font-size", 18).attr("fill", "#71ced8");
+                    } else if (sub_tree[branch].hasOwnProperty(tree_keys[i])) {
+                        d3.select(tree_labels[i]).transition()
+                                                 .attr("x", 50)
+                                                 .attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i]))
+                                                 .attr("font-size", 14)
+                                                 .attr("fill", "#edfdfe")
+                        ;
+                    } else {
+                        d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
+                    }
+                }
+                this_path = photo_list[branch].split("/");
+            }
+
+            this_image = branch;
         };
 
         function drawCard () {
@@ -95,7 +194,7 @@
 
             drawTree(Object.keys(tree_structure)[0]);
 
-
+            drawArrows(1,1);
             d3.select("#photo_card").selectAll("svg").remove()
             var card_canvas = d3.select("#photo_card").append("svg");
 
