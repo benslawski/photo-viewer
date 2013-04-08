@@ -3,6 +3,7 @@
 {% block content %}
     <div id="folder_tree" style="position:absolute; left:10px; top:75px; width:300px; height:400px;"></div>
     <div id="photo_card" style="position:absolute;"></div>
+    <div id="ind_label" style="position:absolute; left:135px; bottom:50px; width:100px; height:58px;"></div>
 
     <div id="left_arrow" style="position:absolute; left:50px; bottom:50px; width:62px; height:58px;">
         <img src="http://dl.dropbox.com/u/95202067/back.png">
@@ -63,11 +64,13 @@
                      this_image_ind = d3.max([0, this_image_ind-1]);
                      this_image=tree_keys[this_image_ind]; 
                      drawTree(this_image); 
+                     drawIndLabel();
                      break;
             case 39: drawArrows(0,1);
                      this_image_ind = d3.min([tree_keys.length, this_image_ind+1]);  
                      this_image=tree_keys[this_image_ind]; 
                      drawTree(this_image); 
+                     drawIndLabel();
                      break;
           }
           update();
@@ -173,6 +176,10 @@
             d3.select("#photo_card").selectAll("svg").selectAll("rect").attr("width", width).attr("height", height);
         };
 
+        function drawIndLabel () {
+            d3.select("#ind_label").selectAll("svg").selectAll("text").text(this_image_ind+1 + " / " + tree_keys.length)
+        };
+
         {% block onload %}
             tree_labels = []
             d3.select("#folder_tree").selectAll("svg").remove()
@@ -195,6 +202,20 @@
             drawTree(Object.keys(tree_structure)[0]);
 
             drawArrows(1,1);
+
+            d3.select("#ind_label").selectAll("svg").remove()
+            d3.select("#ind_label").append("svg").attr("width", 100).attr("height", 58)
+                                   .append("text")
+                                   .text("")
+                                   .attr("fill", "#edfdfe")
+                                   .attr("text-anchor", "middle")
+                                   .attr("x", 50)
+                                   .attr("y", 38)
+                                   .attr("font-family", "Tahoma")
+                                   .attr("font-size", 18)
+            ;
+            drawIndLabel();
+
             d3.select("#photo_card").selectAll("svg").remove()
             var card_canvas = d3.select("#photo_card").append("svg");
 
