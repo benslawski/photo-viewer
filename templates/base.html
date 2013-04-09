@@ -12,29 +12,31 @@
      <div style="position:relative; float:left; top:0; height:60px;">
          <img src="http://dl.dropbox.com/u/95202067/title.png" width=350>
      </div>
-     <div id="color_circles" style="position:relative; float:right; margin-right:15px;"></div>
+     <div id="color_circles" style="position:relative; float:right; margin-right:15px;" height=100%></div>
      <script type="text/javascript">
-         function setCircles() {
-             document.getElementById('color_circles').style.top = window.innerHeight - 325 + window.pageYOffset + 'px';
-         };
-
-         window.onresize = function (d) { setCircles(); {% block onresize %}{% endblock %}}
-         window.onload = function (d) { setCircles(); {% block onload %}{% endblock %}}
-         window.onscroll = function (d) { setCircles(); }
+         window.onresize = function (d) { drawCircles(); main_canvas.attr("height", window.innerHeight-10); {% block onresize %}{% endblock %}}
+         window.onload = function (d) { drawCircles(); {% block onload %}{% endblock %}}
+         window.onscroll = function (d) { drawCircles(); }
      </script>
      <script type="text/javascript">
          var main_canvas = d3.select("#color_circles").append("svg")
                                                       .attr("width", 60)
-                                                      .attr("height", 300)
+                                                      .attr("height", window.innerHeight-10)
          ;
 
          var circles = [];
  
          var colors = [
                        "#99ebf5",
+                       "#62a0c5",
+                       "#4a9caf",
                        "#339999",
+                       "#225c72",
+                       "#193e5e",
                        "#11204B",
+                       "#1c2541",
                        "#282B38",
+                       "#1c1e2d",
                        "#111222"
                       ];
 
@@ -43,7 +45,12 @@
          circle_colors.splice(colors.indexOf(bg_color), 1);
 
          function drawCircles() {
-             main_canvas.selectAll("circle").transition().attr("fill", function (d, i) { return circle_colors[i]; })
+             var height = d3.max([window.innerHeight - 80, 420]);
+             main_canvas.selectAll("circle").attr("fill", function (d, i) { return circle_colors[i]; })
+                                            .attr("cx", 30)
+                                            .attr("cy", function (d, i) { return height + 13
+                                                                               - (circle_colors.length-i-1)*(height-40)/(circle_colors.length-1); })
+             ;
              d3.select("body").transition().style("background-color", bg_color);
          };
 
@@ -51,8 +58,6 @@
                          .data(circle_colors)
                          .enter()
                          .append("circle")
-                                .attr("cx", 30)
-                                .attr("cy", function (d, i) { return 300 - (circle_colors.length - i)*45; })
                                 .attr("r", 20)
                                 .attr("fill", function (d) {return d;})
                                 .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
@@ -64,6 +69,7 @@
                                                               drawCircles();
                                                              })
          ;
+         drawCircles();
 
      </script>
  
