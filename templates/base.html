@@ -7,21 +7,21 @@
          </style>
    </head>
    <body>
-   <div style="min-width: 1024px; min-height: 500px;">
+   <div style="position:relative; min-width: 1024px; min-height: 540px; height:98%; width:100%;">
      <div id="header">{% block header %}{% endblock %}</div>
      <div style="position:relative; float:left; top:0; height:60px;">
          <img src="http://dl.dropbox.com/u/95202067/title.png" width=350>
      </div>
-     <div id="color_circles" style="position:relative; float:right; margin-right:15px;" height=100%></div>
+     <div id="color_circles" style="position:relative; float:right; margin-right:15px;"></div>
      <script type="text/javascript">
-         window.onresize = function (d) { drawCircles(); main_canvas.attr("height", window.innerHeight-10); {% block onresize %}{% endblock %}}
+         window.onresize = function (d) { drawCircles(); {% block onresize %}{% endblock %}}
          window.onload = function (d) { drawCircles(); {% block onload %}{% endblock %}}
          window.onscroll = function (d) { drawCircles(); }
      </script>
      <script type="text/javascript">
          var main_canvas = d3.select("#color_circles").append("svg")
                                                       .attr("width", 60)
-                                                      .attr("height", window.innerHeight-10)
+                                                      .attr("height", d3.max([window.innerHeight - 50, 550]))
          ;
 
          var circles = [];
@@ -45,7 +45,8 @@
          circle_colors.splice(colors.indexOf(bg_color), 1);
 
          function drawCircles() {
-             var height = d3.max([window.innerHeight - 80, 420]);
+             var height = d3.max([window.innerHeight - 90, 450]);
+             main_canvas.attr("height", d3.max([window.innerHeight - 50, 550]));
              main_canvas.selectAll("circle").attr("fill", function (d, i) { return circle_colors[i]; })
                                             .attr("cx", 30)
                                             .attr("cy", function (d, i) { return height + 13
@@ -74,7 +75,7 @@
      </script>
  
      <div id="content">{% block content %}{% endblock%}</div>
-     <div id="footer">{% block footer %}{% endblock%}</div>
+     {% block footer %}{% endblock%}
    </div>
    </body>
 </html>
