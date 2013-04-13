@@ -223,9 +223,17 @@
             drawCard();
 
             d3.select("#left_arrow").on("mousedown", function () { retreatCursor(); })
-            d3.select("#right_arrow").on("mousedown", function () { advanceCursor(); });
-            d3.select("#up_arrow").on("mousedown", function () { listUp(); });
-            d3.select("#down_arrow").on("mousedown", function () { listDown(); });
+                                    .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                    .on("mouseout", function (d) {d3.select('body').style("cursor", "default");});
+            d3.select("#right_arrow").on("mousedown", function () { advanceCursor(); })
+                                     .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                     .on("mouseout", function (d) {d3.select('body').style("cursor", "default");});
+            d3.select("#up_arrow").on("mousedown", function () { listUp(); })
+                                  .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                  .on("mouseout", function (d) {d3.select('body').style("cursor", "default");});
+            d3.select("#down_arrow").on("mousedown", function () { listDown(); })
+                                    .on("mouseover", function (d) {d3.select('body').style("cursor", "pointer");})
+                                    .on("mouseout", function (d) {d3.select('body').style("cursor", "default");});
 
         {% endblock %}
 
