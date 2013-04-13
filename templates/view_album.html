@@ -85,7 +85,7 @@
             if (menu_text.indexOf(this_image) != menu_text.length - 1) {
                 this_image = menu_text[d3.min([menu_text.indexOf(this_image) + 1, menu_text.length-1])];
                 drawTree();
-                drawArrows(0, 1, 0, 0);
+                drawArrows(1, 0, 1, 1);
             }
         };
 
@@ -93,7 +93,7 @@
             if (this_image != this_root) {
                 this_image = menu_text[d3.max([menu_text.indexOf(this_image) - 1, 0])];
                 drawTree();
-                drawArrows(1, 0, 0, 0);
+                drawArrows(0, 1, 1, 1);
             }
         };
 
@@ -103,7 +103,7 @@
                 menu_text = [this_root];
                 menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root][this_root]));
                 drawTree();
-                drawArrows(0,0,0,1);
+                drawArrows(1,1,1,0);
             }
         };
 
@@ -114,7 +114,7 @@
                 this_image = this_root;
                 this_root = tree_root;
                 drawTree();
-                drawArrows(0, 0, 1, 0);
+                drawArrows(1, 1, 0, 1);
             }
         };
 
@@ -175,7 +175,23 @@
                                              .attr("font-size", 14)
                                              .attr("x", 0)
                                              .attr("y", -10)
-//                                             .on("click", function (d) {drawTree(d, true);})
+                                             .on("mousedown", function (d) {
+                                                                           this_image = d;
+                                                                           if (d == this_root && tree_root != this_root) {
+                                                                               this_root = tree_root;
+                                                                               menu_text = [tree_root];
+                                                                               menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root]));
+                                                                               drawTree();
+                                                                           }
+                                                                           else if (d != this_root && tree_root == this_root) {
+                                                                               this_root = d;
+                                                                               menu_text = [this_root];
+                                                                               menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root][this_root]));
+                                                                               drawTree();
+                                                                           } else {
+                                                                               drawTree();
+                                                                           }
+                                                                       })
             ;
             tree_labels = tree_labels[0];
 
