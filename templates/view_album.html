@@ -1,198 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div id="folder_tree" style="position:absolute; left:10px; top:75px; width:300px; height:400px;"></div>
-    <div id="photo_card" style="position:absolute;"></div>
-    <div id="ind_label" style="position:absolute; left:135px; bottom:50px; width:100px; height:58px;"></div>
-
-    <div id="left_arrow" style="position:absolute; left:50px; bottom:50px; width:62px; height:58px;">
-        <img src="http://dl.dropbox.com/u/95202067/back.png">
-    </div>
-    <div id="right_arrow" style="position:absolute; left:260px; bottom:50px; width:62px; height:58px;">
-        <img src="http://dl.dropbox.com/u/95202067/forward.png">
-    </div>
+    {% block div_objects %}
+        <div id="folder_tree" style="position:absolute; left:10px; top:75px; width:300px; height:400px;"></div>
+        <div id="photo_card" style="position:absolute;"></div>
+    
+        <div id="left_arrow" style="position:absolute; left:50px; bottom:50px; width:62px; height:58px;">
+            <img src="http://dl.dropbox.com/u/95202067/back.png">
+        </div>
+        <div id="right_arrow" style="position:absolute; left:260px; bottom:50px; width:62px; height:58px;">
+            <img src="http://dl.dropbox.com/u/95202067/forward.png">
+        </div>
+        <div id="up_arrow" style="position:absolute; left:155px; bottom:50px; width:62px; height:58px;">
+            <img src="http://dl.dropbox.com/u/95202067/up.png">
+        </div>
+        <div id="down_arrow" style="position:absolute; left:155px; bottom:50px; width:62px; height:58px;">
+            <img src="http://dl.dropbox.com/u/95202067/down.png">
+        </div>
+    {% endblock %}
 
     <script type="text/javascript">
         var photo_list = {{ photo_list | safe }};
         var tree_structure = {{ structure | safe }};
+        var tmp;
 
-        var tree_keys = [Object.keys(tree_structure)[0]];
-        var this_key0, this_key1, this_key2;
-        var sub_structure, sub_structure0, sub_structure1;
-        sub_structure = tree_structure[Object.keys(tree_structure)[0]];
-        for (i=0; i<Object.keys(sub_structure).length; i++) {
-            this_key0 = Object.keys(sub_structure)[i];
-            tree_keys.push(this_key0);
-            sub_structure0 = sub_structure[this_key0];
+        var this_image = Object.keys(tree_structure)[0];
+        var tree_root = this_image;
+        var this_root = this_image;
 
-            for (j=0; j<Object.keys(sub_structure0).length; j++) {
-                this_key1 = Object.keys(sub_structure0)[j];
-                tree_keys.push(this_key1);
-                sub_structure1 = sub_structure0[this_key1];
-
-                for (k=0; k<Object.keys(sub_structure1).length; k++) {
-                    this_key2 = Object.keys(sub_structure1)[k];
-                    tree_keys.push(this_key2);
-                }
+        var menu_text = [tree_root];
+        menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root]));
+        var tree_canvas;
+        var tree_labels = [];
+        var tree_labels_text = [tree_root];
+        for (i=1; i<menu_text.length; i++) {
+            tree_labels_text.push(menu_text[i]);
+            tmp = Object.keys(tree_structure[tree_root][menu_text[i]]);
+            for (j=0; j<tmp.length; j++) {
+                tree_labels_text.push(tmp[j]);
             }
         }
-        var tree_labels = [];
-
-        var this_path = [Object.keys(tree_structure)[0]];
-        var this_image = Object.keys(tree_structure)[0];
-        var this_image_ind = 0;
-
-        function drawArrows (leftState, rightState) {
-            if (leftState == 1 && this_image_ind > 0) { 
-                document.getElementById("left_arrow").style.display = "block";
-            } else {
-                document.getElementById("left_arrow").style.display = "none";
-            }
-
-            if (rightState == 1 && this_image_ind < tree_keys.length-1) { 
-                document.getElementById("right_arrow").style.display = "block";
-            } else {
-                document.getElementById("right_arrow").style.display = "none";
-            }
-        };
-
-        function advancePhoto() {
-            drawArrows(1, 0);
-            this_image_ind = d3.max([0, this_image_ind-1]);
-            this_image=tree_keys[this_image_ind];
-            drawTree(this_image, false);
-            drawIndLabel();
-        };
-
-        function retreatPhoto() {
-            drawArrows(0, 1);
-            this_image_ind = d3.min([tree_keys.length-1, this_image_ind+1]);
-            this_image=tree_keys[this_image_ind];
-            drawTree(this_image, false);
-            drawIndLabel();
-        };
-
-        window.focus();
-        d3.select(window).on("keydown", function() {
-          switch (d3.event.keyCode) {
-            case 37: advancePhoto();
-                     break;
-            case 39: retreatPhoto();
-                     break;
-          }
-        });
-
-
-        window.onkeyup = function () { drawArrows(1,1); };
-        window.onmouseup = function () { drawArrows(1,1); };
-
-        function drawTree (branch, isClick) {
-            var upshift, is_branch;
-
-            var at_root = this_path.length == 1;
-            var upshift = this_path.indexOf(branch) >= 0;
-
-            var branch_path = photo_list[branch].split("/");
-            var sub_tree = tree_structure;
-            for (i=0; i<branch_path.length-1; i++) {
-                sub_tree = sub_tree[branch_path[i]];
-            }
-
-            var is_collection = Object.keys(sub_tree[branch]).length > 0;
-
-            this_image = branch;
-            this_image_ind = tree_keys.indexOf(branch);
-            this_path = branch_path;
-            drawIndLabel();
-
-            if (upshift && !at_root) {
-                if (isClick) {
-                    this_path.pop()
-
-                    for (i=0; i<tree_labels.length; i++) {
-                        if (tree_keys[i] == branch) {
-                            d3.select(tree_labels[i]).transition()
-                                                     .attr("x", 50)
-                                                     .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
-                                                     .attr("font-size", 14)
-                                                     .attr("fill", "#71ced8");
-                        }
-                        else if (tree_keys[i] == this_path[this_path.length-1]) {
-                            d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe").attr("x", 35).attr("y", 15).attr("font-size", 18);
-                        }
-                        else if (Object.keys(sub_tree).indexOf(tree_keys[i]) >= 0) {
-                            d3.select(tree_labels[i]).transition()
-                                                     .attr("x", 50)
-                                                     .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
-                                                     .attr("font-size", 14)
-                                                     .attr("fill", "#edfdfe");
-                        } else {
-                            d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
-                        }
-                    }
-                } else {
-                    for (i=0; i<tree_labels.length; i++) {
-                        if (tree_keys[i] == branch) {
-                                d3.select(tree_labels[i]).transition().attr("fill", "#71ced8").attr("x", 35).attr("y", 15).attr("font-size", 18);
-                        }
-                        else if (Object.keys(sub_tree[branch]).indexOf(tree_keys[i]) >= 0) {
-                                d3.select(tree_labels[i]).transition()
-                                                         .attr("x", 50)
-                                                         .attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i]))
-                                                         .attr("font-size", 14)
-                                                         .attr("fill", "#edfdfe");
-                        } else {
-                                d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
-                        }
-                    }
-                }
-            }
-
-            if ((at_root && upshift) || (!upshift && is_collection)) {
-                for (i=0; i<tree_labels.length; i++) {
-                    if (tree_keys[i] == branch) {
-                            d3.select(tree_labels[i]).transition().attr("fill", "#71ced8").attr("x", 35).attr("y", 15).attr("font-size", 18);
-                    }
-                    else if (Object.keys(sub_tree[branch]).indexOf(tree_keys[i]) >= 0) {
-                            d3.select(tree_labels[i]).transition()
-                                                     .attr("x", 50)
-                                                     .attr("y", 40 + 20*Object.keys(sub_tree[branch]).indexOf(tree_keys[i]))
-                                                     .attr("font-size", 14)
-                                                     .attr("fill", "#edfdfe");
-                    } else {
-                            d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
-                    }
-
-                }
-            }
-
-            if (!upshift && !is_collection) {
-                this_path.pop()
-
-                for (i=0; i<tree_labels.length; i++) {
-                    if (tree_keys[i] == branch) {
-                            d3.select(tree_labels[i]).transition()
-                                                     .attr("x", 50)
-                                                     .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
-                                                     .attr("font-size", 14)
-                                                     .attr("fill", "#71ced8");
-                    }
-                    else if (Object.keys(sub_tree).indexOf(tree_keys[i]) >= 0) {
-                            d3.select(tree_labels[i]).transition()
-                                                     .attr("x", 50)
-                                                     .attr("y", 40 + 20*Object.keys(sub_tree).indexOf(tree_keys[i]))
-                                                     .attr("font-size", 14)
-                                                     .attr("fill", "#edfdfe");
-                    }
-                    else if (tree_keys[i] == this_path[this_path.length-1]) {
-                        d3.select(tree_labels[i]).transition().attr("fill", "#edfdfe").attr("x", 35).attr("y", 15).attr("font-size", 18);
-                    } else {
-                            d3.select(tree_labels[i]).transition().attr("x", 0).attr("y", -10).attr("font-size", 14).attr("fill", "#edfdfe");
-                    }
-
-                }
-            }
-        };
 
         function drawCard () {
             var card_handle = document.getElementById('photo_card');
@@ -208,17 +55,118 @@
             d3.select("#photo_card").selectAll("svg").selectAll("rect").attr("width", width).attr("height", height);
         };
 
-        function drawIndLabel () {
-            d3.select("#ind_label").selectAll("svg").selectAll("text").text(this_image_ind+1 + " / " + tree_keys.length)
+        function drawArrows (leftState, rightState, upState, downState) {
+            if (leftState == 1 && this_image != this_root) { 
+                document.getElementById("left_arrow").style.display = "block";
+            } else {
+                document.getElementById("left_arrow").style.display = "none";
+            }
+
+            if (rightState == 1 && menu_text.indexOf(this_image) != menu_text.length - 1) { 
+                document.getElementById("right_arrow").style.display = "block";
+            } else {
+                document.getElementById("right_arrow").style.display = "none";
+            }
+
+            if (upState == 1 && this_root != tree_root) { 
+                document.getElementById("up_arrow").style.display = "block";
+            } else {
+                document.getElementById("up_arrow").style.display = "none";
+            }
+
+            if (downState == 1 && this_root == tree_root && this_image != tree_root) {
+                document.getElementById("down_arrow").style.display = "block";
+            } else {
+                document.getElementById("down_arrow").style.display = "none";
+            }
+        };
+
+        function advanceCursor() {
+            if (menu_text.indexOf(this_image) != menu_text.length - 1) {
+                this_image = menu_text[d3.min([menu_text.indexOf(this_image) + 1, menu_text.length-1])];
+                drawTree();
+                drawArrows(0, 1, 0, 0);
+            }
+        };
+
+        function retreatCursor() {
+            if (this_image != this_root) {
+                this_image = menu_text[d3.max([menu_text.indexOf(this_image) - 1, 0])];
+                drawTree();
+                drawArrows(1, 0, 0, 0);
+            }
+        };
+
+        function listDown() {
+            if (this_root == tree_root && this_image != tree_root) {
+                this_root = this_image;
+                menu_text = [this_root];
+                menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root][this_root]));
+                drawTree();
+                drawArrows(0,0,0,1);
+            }
+        };
+
+        function listUp() {
+            if (this_root != tree_root) {
+                menu_text = [tree_root];
+                menu_text.push.apply(menu_text, Object.keys(tree_structure[tree_root]));
+                this_image = this_root;
+                this_root = tree_root;
+                drawTree();
+                drawArrows(0, 0, 1, 0);
+            }
+        };
+
+        window.focus();
+        d3.select(window).on("keydown", function() {
+          switch (d3.event.keyCode) {
+            case 37: retreatCursor();
+                     break;
+            case 39: advanceCursor();
+                     break;
+            case 38: listUp();
+                     break;
+            case 40: listDown();
+                     break;
+          }
+        });
+
+
+        window.onkeyup = function () { drawArrows(1,1,1,1); };
+        window.onmouseup = function () { drawArrows(1,1,1,1); };
+
+        function drawTree () {
+            tree_canvas.selectAll("text")
+                       .transition()
+                       .attr("x", function(d) {
+                                                  if (menu_text.indexOf(d) == 0) { return 35; }
+                                                  else if (menu_text.indexOf(d) == -1) { return -10; }
+                                                  else { return 50; }
+                                              })
+                       .attr("y", function(d) {
+                                                  if (menu_text.indexOf(d) == 0) { return 35; }
+                                                  else if (menu_text.indexOf(d) == -1) { return -10; }
+                                                  else { return 40 + 20*menu_text.indexOf(d); }
+                                              })
+                       .attr("font-size", function(d) {
+                                                          if (menu_text.indexOf(d) == 0) { return 18; }
+                                                          else { return 14; }
+                                                      })
+                       .attr("fill", function(d) {
+                                                     if (d == this_image) { return "#71ced8"; }
+                                                     else { return "#edfdfe"; }
+                                                 })
+                       ;
+
         };
 
         {% block onload %}
             tree_labels = []
             d3.select("#folder_tree").selectAll("svg").remove()
-            var tree_canvas = d3.select("#folder_tree").append("svg").attr("width", 300).attr("height", 400);
-
+            tree_canvas = d3.select("#folder_tree").append("svg").attr("width", 300).attr("height", 400);
             tree_labels = tree_canvas.selectAll("text")
-                                     .data(tree_keys)
+                                     .data(tree_labels_text)
                                      .enter()
                                      .append("text")
                                              .text(function (d) {return d;})
@@ -227,26 +175,13 @@
                                              .attr("font-size", 14)
                                              .attr("x", 0)
                                              .attr("y", -10)
-                                             .on("click", function (d) {drawTree(d, true);})
+//                                             .on("click", function (d) {drawTree(d, true);})
             ;
             tree_labels = tree_labels[0];
 
-            drawTree(Object.keys(tree_structure)[0], true);
+            drawTree(menu_text, tree_root);
 
-            drawArrows(1,1);
-
-            d3.select("#ind_label").selectAll("svg").remove()
-            d3.select("#ind_label").append("svg").attr("width", 100).attr("height", 58)
-                                   .append("text")
-                                   .text("")
-                                   .attr("fill", "#edfdfe")
-                                   .attr("text-anchor", "middle")
-                                   .attr("x", 50)
-                                   .attr("y", 38)
-                                   .attr("font-family", "Tahoma")
-                                   .attr("font-size", 18)
-            ;
-            drawIndLabel();
+            drawArrows(1,1,1,1);
 
             d3.select("#photo_card").selectAll("svg").remove()
             var card_canvas = d3.select("#photo_card").append("svg");
@@ -256,17 +191,19 @@
                        .attr("y", 0)
                        .attr("fill", "#edfdfe")
             ;
+            drawCard();
 
-            drawCard(); 
-
-            d3.select("#left_arrow").on("mousedown", function () { advancePhoto(); })
-            d3.select("#right_arrow").on("mousedown", function () { retreatPhoto(); });
+            d3.select("#left_arrow").on("mousedown", function () { retreatCursor(); })
+            d3.select("#right_arrow").on("mousedown", function () { advanceCursor(); });
+            d3.select("#up_arrow").on("mousedown", function () { listUp(); });
+            d3.select("#down_arrow").on("mousedown", function () { listDown(); });
 
         {% endblock %}
 
         {% block onresize %}
             drawCard();
         {% endblock %}
+
     </script>
 
 {% endblock %}
