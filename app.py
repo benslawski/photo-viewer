@@ -23,7 +23,8 @@ app.config['SECRET_KEY'] = '908u23r@32r2&//adfeofi21002'
 
 @app.route('/', methods=['GET'])
 def main_page():
-    conn = S3Connection('AKIAI6WMUYBUBJ2T3GMQ', 'hz0evOhGQTHgAeUeEZaJ0XIBv+wVU1C6iKyafe5b')    
+    ## TODO: load aws access keys from file
+    conn = S3Connection('', '')    
     bucket = conn.get_bucket('photo-collective')
    
     structure = {}
@@ -47,8 +48,6 @@ def main_page():
                     sub_structure[dir] = {}
                 sub_structure = sub_structure[dir]
 
-    print structure, photo_list
-
     session['data_tree'] = structure
     return render_template('view_album.html', structure=structure, photo_list=photo_list)
 
@@ -66,19 +65,6 @@ def get_photo():
         return substructure['image']
     return None
 
-
-@app.route('/caption/', methods=['GET'])
-def get_caption():
-    photo_path = request.args.get('path')
-    splitpath = photo_path.split('/')
-
-    sub_structure = session['data_tree']
-    for dir in splitpath:
-        sub_structure = sub_structure[dir]
-
-    if 'caption' in substructure:
-        return substructure['caption']
-    return None
 
 
 if __name__ == '__main__':
